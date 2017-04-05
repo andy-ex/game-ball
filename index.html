@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Ball</title>
+</head>
+<body>
+
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+
+    <canvas id="can"></canvas>
+
+    <script>
+        let canvas = document.getElementById("can");
+
+
+        const G = 9.8;
+        const H_SCALE = 1;
+        const V_SCALE = 1;
+        const START_SPEED =  90;
+        const START_ANGLE = 45;
+        const FPS = 5;
+
+
+        canvas.width = 500; //window.innerWidth - 100;
+        canvas.height = window.innerHeight - 100;
+
+        let context = canvas.getContext("2d");
+        let centerX = 250;
+        let centerY = 250;
+        let radius = 20;
+
+        class Vector {
+            constructor(v, angle) {
+                this.v = v;
+                this.a = angle * (Math.PI / 180);
+            }
+        }
+
+        class Ball {
+            constructor(x, y, r) {
+                this.x = x;
+                this.y = y;
+                this.r = r;
+                this.v = 0;
+            }
+
+            draw(context) {
+                context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+                circle(context, this.x, this.y, this.r);
+            }
+
+            kick(context, vector) {
+                let ball = this;
+
+                ball.x0 = ball.x;
+                ball.y0 = ball.y;
+                ball.t0 = Date.now();
+
+                return setInterval(function () {
+                    let v0 = vector.v;
+                    let t = (Date.now() - ball.t0) / 100;
+
+                    let newX = ball.x0 + vector.v * t * Math.cos(vector.a);
+                    let newY = ball.y0 - (vector.v * t * Math.sin(vector.a) - 0.5 * G * Math.pow(t, 2));
+
+                    let angle = Math.atan((v0 * Math.sin(vector.a) - G * t) / (v0 * Math.cos(vector.a)));
+                    if (Math.cos(vector.a) < 0) {
+                        angle += Math.PI;
+                    }
+
+                    ball.x = newX;
+                    ball.y = newY;
+
+                    if ((ball.x + ball.r >= context.canvas.width && Math.cos(vector.a) > 0)
+                            || (ball.x - ball.r <= 0 && Math.cos(vector.a) < 0)) {
+
+                        vector.v = Math.sqrt(Math.pow(v0, 2) - 2 * v0 * G * t * Math.sin(vector.a) + Math.pow(G * t, 2));
+                        vector.a = Math.PI - angle;
+
+                        ball.t0 = Date.now();
+                        ball.x0 = ball.x;
+                        ball.y0 = ball.y;
+                    }
+                    if ((ball.y - ball.r <= 0 && Math.sin(angle) > 0) || (
+                            ball.y + ball.r >= context.canvas.height && Math.sin(angle) < 0)) {
+                        vector.v = Math.sqrt(Math.pow(v0, 2) - 2 * v0 * G * t * Math.sin(vector.a) + Math.pow(G * t, 2));
+                        vector.a = 2 * Math.PI - angle;
+
+                        ball.t0 = Date.now();
+                        ball.x0 = ball.x;
+                        ball.y0 = ball.y;
+                    }
+
+                    ball.draw(context);
+                }, FPS);
+            }
+        }
+
+        function circle(context, x, y, r) {
+            context.beginPath();
+            context.arc(x, y, r, 0, 2 * Math.PI, false);
+            context.fillStyle = 'green';
+            context.fill();
+        }
+
+        let ball = new Ball(centerX, centerY, radius);
+        ball.draw(context);
+
+        let intervalId = ball.kick(context, new Vector(START_SPEED, START_ANGLE));
+
+        canvas.addEventListener('click', function() {clearInterval(intervalId)});
+    </script>
+
+
+
+</body>
+</html>
