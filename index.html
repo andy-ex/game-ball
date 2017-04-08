@@ -19,11 +19,9 @@
 
 
         const G = 9.8;
-        const H_SCALE = 1;
-        const V_SCALE = 1;
         const START_SPEED =  90;
         const START_ANGLE = 45;
-        const FPS = 5;
+        const FPS = 10;
 
 
         canvas.width = 500; //window.innerWidth - 100;
@@ -42,62 +40,92 @@
         }
 
         class Ball {
-            constructor(x, y, r) {
+            constructor(x, y, r, velocity) {
                 this.x = x;
                 this.y = y;
                 this.r = r;
-                this.v = 0;
+                this.velocity = velocity;
+
+                this.t0 = Date.now();
+                this.x0 = x;
+                this.y0 = y;
             }
 
             draw(context) {
-                context.clearRect(0, 0, context.canvas.width, context.canvas.height);
                 circle(context, this.x, this.y, this.r);
             }
 
-            kick(context, vector) {
-                let ball = this;
+            currentVelocity() {
+                let v0 = this.velocity.v;
+                let t = (Date.now() - this.t0) / 100;
+                let alpha = this.velocity.a;
 
-                ball.x0 = ball.x;
-                ball.y0 = ball.y;
-                ball.t0 = Date.now();
+                return Math.sqrt(Math.pow(v0, 2) - 2 * v0 * G * t * Math.sin(alpha) + Math.pow(G * t, 2));
+            }
 
-                return setInterval(function () {
-                    let v0 = vector.v;
-                    let t = (Date.now() - ball.t0) / 100;
+            currentAngle() {
+                let v0 = this.velocity.v;
+                let t = (Date.now() - this.t0) / 100;
+                let alpha = this.velocity.a;
 
-                    let newX = ball.x0 + vector.v * t * Math.cos(vector.a);
-                    let newY = ball.y0 - (vector.v * t * Math.sin(vector.a) - 0.5 * G * Math.pow(t, 2));
+                //console.log("currentAngle", v0, t, alpha*180/Math.PI, Math.cos(alpha));
 
-                    let angle = Math.atan((v0 * Math.sin(vector.a) - G * t) / (v0 * Math.cos(vector.a)));
-                    if (Math.cos(vector.a) < 0) {
-                        angle += Math.PI;
-                    }
+                let angle = Math.atan((v0 * Math.sin(alpha) - G * t) / (v0 * Math.cos(alpha)));
+                if (Math.cos(alpha) < 0.0001 || Math.cos(alpha)> -0.0001) {return alpha;}
+                if (Math.cos(alpha) < 0) {
+                    angle += Math.PI;
+                }
 
-                    ball.x = newX;
-                    ball.y = newY;
+                return angle;
+            }
 
-                    if ((ball.x + ball.r >= context.canvas.width && Math.cos(vector.a) > 0)
-                            || (ball.x - ball.r <= 0 && Math.cos(vector.a) < 0)) {
+            bounce(angle) {
+                this.velocity.v = this.currentVelocity();
+                this.velocity.a = 2 * Math.PI - this.currentAngle() + 2 * Math.atan(angle);
 
-                        vector.v = Math.sqrt(Math.pow(v0, 2) - 2 * v0 * G * t * Math.sin(vector.a) + Math.pow(G * t, 2));
-                        vector.a = Math.PI - angle;
+                this.t0 = Date.now();
+                this.x0 = this.x;
+                this.y0 = this.y;
+            }
 
-                        ball.t0 = Date.now();
-                        ball.x0 = ball.x;
-                        ball.y0 = ball.y;
-                    }
-                    if ((ball.y - ball.r <= 0 && Math.sin(angle) > 0) || (
-                            ball.y + ball.r >= context.canvas.height && Math.sin(angle) < 0)) {
-                        vector.v = Math.sqrt(Math.pow(v0, 2) - 2 * v0 * G * t * Math.sin(vector.a) + Math.pow(G * t, 2));
-                        vector.a = 2 * Math.PI - angle;
+            collides(another) {
+                let distance = Math.sqrt(Math.pow(this.x - another.x, 2) + Math.pow(this.y - another.y, 2));
 
-                        ball.t0 = Date.now();
-                        ball.x0 = ball.x;
-                        ball.y0 = ball.y;
-                    }
+                return distance <= this.r + another.r;
+            }
 
-                    ball.draw(context);
-                }, FPS);
+            move() {
+                let v0 = this.velocity.v;
+                let alpha = this.velocity.a;
+
+                let t = (Date.now() - this.t0) / 100;
+
+                this.x = this.x0 + v0 * t * Math.cos(alpha);
+                this.y = this.y0 - (v0 * t * Math.sin(alpha) - 0.5 * G * Math.pow(t, 2));
+
+                let angle = Math.atan((v0 * Math.sin(alpha) - G * t) / (v0 * Math.cos(alpha)));
+                if (Math.cos(alpha) < 0) {
+                    angle += Math.PI;
+                }
+
+                if ((this.x + this.r >= context.canvas.width && Math.cos(alpha) > 0)
+                        || (this.x - this.r <= 0 && Math.cos(alpha) < 0)) {
+
+                    this.velocity.v = this.currentVelocity();
+                    this.velocity.a = Math.PI - angle;
+
+                    this.t0 = Date.now();
+                    this.x0 = this.x;
+                    this.y0 = this.y;
+                } else if ((this.y - this.r <= 0 && Math.sin(angle) > 0) || (
+                        this.y + this.r >= context.canvas.height && Math.sin(angle) < 0)) {
+                    this.velocity.v = this.currentVelocity();
+                    this.velocity.a = 2 * Math.PI - angle;
+
+                    this.t0 = Date.now();
+                    this.x0 = this.x;
+                    this.y0 = this.y;
+                }
             }
         }
 
@@ -108,10 +136,38 @@
             context.fill();
         }
 
-        let ball = new Ball(centerX, centerY, radius);
-        ball.draw(context);
+        let v = new Vector(0, 270);
+        let v1 = new Vector(0, 340);
+        let balls = [new Ball(centerX - 20, centerY, radius, v), new Ball(centerX, canvas.height - 5*radius, radius, v1)];
 
-        let intervalId = ball.kick(context, new Vector(START_SPEED, START_ANGLE));
+        let intervalId = setInterval(function() {
+            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+            balls.forEach(function(ball) {
+               for (let another of balls) {
+                   if (another == ball) return;
+
+                   let k = Math.atan((ball.y - another.y) / (another.x - ball.x));
+                   let normal = k > 0 ? k - Math.PI / 2 : k + Math.PI / 2;
+
+                   if (ball.collides(another)) {
+
+                       another.bounce(normal);
+                       ball.bounce(normal);
+
+                       while (ball.collides(another)) {
+                           ball.move();
+                           another.move()
+                       }
+                   }
+               }
+            });
+
+            balls.forEach(function(ball) {
+                ball.move();
+                ball.draw(context);
+            });
+        }, FPS);
 
         canvas.addEventListener('click', function() {clearInterval(intervalId)});
     </script>
