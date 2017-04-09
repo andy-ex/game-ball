@@ -19,9 +19,10 @@
 
 
         const G = 9.8;
+        const Y_DIR = -1; //1 - positive Y direction, -1 - negative direction
         const START_SPEED =  90;
         const START_ANGLE = 45;
-        const FPS = 10;
+        const FPS = 1;
 
 
         canvas.width = 500; //window.innerWidth - 100;
@@ -101,7 +102,7 @@
                 let t = (Date.now() - this.t0) / 100;
 
                 this.x = this.x0 + v0 * t * Math.cos(alpha);
-                this.y = this.y0 - (v0 * t * Math.sin(alpha) - 0.5 * G * Math.pow(t, 2));
+                this.y = this.y0 + Y_DIR * (v0 * t * Math.sin(alpha) - 0.5 * G * Math.pow(t, 2));
 
                 let angle = Math.atan((v0 * Math.sin(alpha) - G * t) / (v0 * Math.cos(alpha)));
                 if (Math.cos(alpha) < 0) {
@@ -111,20 +112,13 @@
                 if ((this.x + this.r >= context.canvas.width && Math.cos(alpha) > 0)
                         || (this.x - this.r <= 0 && Math.cos(alpha) < 0)) {
 
-                    this.velocity.v = this.currentVelocity();
+                    this.bounce();
                     this.velocity.a = Math.PI - angle;
 
-                    this.t0 = Date.now();
-                    this.x0 = this.x;
-                    this.y0 = this.y;
-                } else if ((this.y - this.r <= 0 && Math.sin(angle) > 0) || (
-                        this.y + this.r >= context.canvas.height && Math.sin(angle) < 0)) {
-                    this.velocity.v = this.currentVelocity();
-                    this.velocity.a = 2 * Math.PI - angle;
+                } else if ((this.y - this.r <= 0 && Y_DIR * Math.sin(angle) < 0) || (
+                        this.y + this.r >= context.canvas.height && Y_DIR * Math.sin(angle) > 0)) {
 
-                    this.t0 = Date.now();
-                    this.x0 = this.x;
-                    this.y0 = this.y;
+                    this.bounce(0);
                 }
             }
         }
@@ -136,9 +130,13 @@
             context.fill();
         }
 
-        let v = new Vector(0, 270);
-        let v1 = new Vector(0, 340);
-        let balls = [new Ball(centerX - 20, centerY, radius, v), new Ball(centerX, canvas.height - 5*radius, radius, v1)];
+        let v = new Vector(50, 135);
+        let v1 = new Vector(100, 45);
+        let v2 = new Vector(50, 0);
+        let balls = [new Ball(centerX - 50, centerY, radius, v),
+            new Ball(centerX, centerY, radius, v1),
+            new Ball(centerX + 50, centerY, radius, v2)
+        ];
 
         let intervalId = setInterval(function() {
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
@@ -162,6 +160,9 @@
                    }
                }
             });
+
+            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
 
             balls.forEach(function(ball) {
                 ball.move();
