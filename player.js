@@ -18,9 +18,11 @@ class Player {
     }
 
     jump() {
+        if (this.v != 0) return;
+
         this.t0 = Date.now();
 
-        this.v = PLAYER_JUMP_HEIGHT;
+        this.v = PLAYER_JUMP_VELOCITY;
     }
 
     move() {

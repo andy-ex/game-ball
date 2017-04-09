@@ -9,7 +9,7 @@ const V_BORDER = 500;
 const H_BORDER = 500;
 
 const PLAYER_STEP = 2;
-const PLAYER_JUMP_HEIGHT = 50;
+const PLAYER_JUMP_VELOCITY = 50;
 const PLAYER_RADIUS = 50;
 const PLAYER_COLOR = 'red';
 
