@@ -1,60 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Game Ball</title>
+    <head>
+        <meta charset="UTF-8">
+        <title>Game Ball</title>
+        <script src="js/index.js" async></script>
+        <link rel="stylesheet" type="text/css" href="css/general.css"/>
+        <link rel="stylesheet" type="text/css" href="css/staticpage.css"/>
+        
+        <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+    </head>
+    <body>
 
-    <script src="vector.js"></script>
-    <script src="ball.js"></script>
-    <script src="player.js"></script>
-    <script src="constants.js"></script>
-</head>
-<body>
+        <div class='main_container'>
+            <div id='game_name' class='main_container_up_title'>VOLLEYBALL</div>
+            <div id='main_btns_container'>
+                <input type="button" value="START" id='start'>
+            </div>
+        </div>
 
-<style>
-    canvas {
-        border: 1px solid black;
-    }
-</style>
-
-<canvas id="can"></canvas>
-
-<script>
-    let canvas = document.getElementById("can");
-
-    canvas.width = V_BORDER
-    canvas.height = H_BORDER;
-
-    let context = canvas.getContext("2d");
-
-    let ball = new Ball(50, 200, BALL_RADIUS, new Vector(20, 0));
-    let player = new Player(50, canvas.height, PLAYER_RADIUS);
-
-    let intervalId = setInterval(function () {
-        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-
-        if (ball.collides(player)) {
-            ball.ballBounce(player);
-        }
-
-        ball.move();
-        player.move();
-
-        ball.draw(context);
-        player.draw(context)
-
-    }, REPEAT_INTERVAL);
-
-    canvas.addEventListener('click', function() {clearInterval(intervalId)});
-    document.onkeydown = function (e) {
-
-        if (e.keyCode == 37) player.x -= PLAYER_STEP;
-        if (e.keyCode == 38) player.jump();
-        if (e.keyCode == 39) player.x += PLAYER_STEP;
-    }
-
-</script>
-
-
-</body>
+    </body>
 </html>

@@ -1,0 +1,86 @@
+.main_container {
+    background-image: url(../img/beach.jpg);
+    background-size: 1010px 500px;
+    background-color: #89E7EF;
+    width: 1010px;
+    height: 500px;
+    text-align: center;
+}
+
+#main_btns_container {
+    display: block;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%
+}
+
+#main_btns_container > * {
+    display: inline-block;
+}
+
+#main_btns_container > input[type='button'] {
+    font-size: 64px;
+    padding: 5px 20px;
+    background-color: white;
+    border-radius: 20px;
+}
+
+.main_container_up_title {
+    text-align: center;
+    display: block;
+    margin: 50px 0;
+}
+
+#gameover {
+    font-size: 64px;
+    font-weight: 600;
+    font-family: 'GameOver', 'Press Start 2P';
+    -webkit-animation: neon2 1.5s ease-in-out infinite alternate;
+    -moz-animation: neon2 1.5s ease-in-out infinite alternate;
+    animation: neon2 1.5s ease-in-out infinite alternate;
+}
+
+#winner {
+    font-size: 48px;
+    position: absolute;
+    bottom: 0px;
+    display: block;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 50px;
+    font-family: 'Press Start 2P';
+}
+
+#game_name {
+    font-size: 72px;
+    font-weight: 600;
+
+    -webkit-animation: neon1 1.5s ease-in-out infinite alternate;
+    -moz-animation: neon1 1.5s ease-in-out infinite alternate;
+    animation: neon1 1.5s ease-in-out infinite alternate;
+}
+
+@font-face {
+    font-family: 'GameOver';
+    src: url('../font/GameOver.ttf');
+}
+
+@-webkit-keyframes neon2 {
+    from {
+        text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #FF1177, 0 0 70px #FF1177, 0 0 80px #FF1177, 0 0 100px #FF1177, 0 0 150px #FF1177;
+    }
+    to {
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
+    }
+}
+
+@-webkit-keyframes neon1 {
+    from {
+        text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #ff7, 0 0 70px #ff7, 0 0 80px #ff7, 0 0 100px #ff7, 0 0 150px #ff7;
+    }
+    to {
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #ff7, 0 0 35px #ff7, 0 0 40px #ff7, 0 0 50px #ff7, 0 0 75px #ff7;
+    }
+}
